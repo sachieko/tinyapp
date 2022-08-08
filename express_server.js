@@ -11,19 +11,21 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
   "b4k4m1": "http://www.example.com"
 };
-
+// GET /
 app.get('/', (req, res) => {
   res.send("Hello!");
 });
-
+// GET hello
 app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>Waarudo</b></body></html>\n');
 });
 
+// GET urls
 app.get('/urls', (req, res) => {
   const templateVar = { urls: urlDatabase };
   res.render('urls_index', templateVar);
-})
+});
+// GET urls.json
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
