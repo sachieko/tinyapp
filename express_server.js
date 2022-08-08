@@ -25,6 +25,11 @@ app.get('/urls', (req, res) => {
   const templateVar = { urls: urlDatabase };
   res.render('urls_index', templateVar);
 });
+
+// GET urls/:id
+app.get('/urls/:id', (req, res) => {
+  res.send(req.params);
+});
 // GET urls.json
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
