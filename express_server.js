@@ -28,7 +28,8 @@ app.get('/urls', (req, res) => {
 
 // GET urls/:id
 app.get('/urls/:id', (req, res) => {
-  res.send(req.params);
+  const templateVar = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  res.render('urls_show', templateVar);
 });
 // GET urls.json
 app.get('/urls.json', (req, res) => {
