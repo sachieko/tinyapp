@@ -39,16 +39,19 @@ app.get('/urls', (req, res) => {
   const templateVar = { urls: urlDatabase };
   res.render('urls_index', templateVar);
 });
-// POST urls
-app.post('/urls', (req, res) => {
-  console.log(req.body);
-  let randomString = generateRandomString();
-  res.send(`New url posted to: /${randomString}`);
-});
+
 
 // GET urls/new
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
+});
+
+// POST urls
+app.post('/urls', (req, res) => {
+  console.log(req.body);
+  let randomString = generateRandomString();
+  urlDatabase[randomString] = req.body.longURL;
+  res.redirect(`/urls/${randomString}`);
 });
 
 // GET urls/:id
@@ -56,6 +59,16 @@ app.get('/urls/:id', (req, res) => {
   const templateVar = { id: req.params.id, longURL: urlDatabase[req.params.id]};
   res.render('urls_show', templateVar);
 });
+
+// GET u/:id in database
+app.get('/u/:id', (req, res) => {
+  const templateVar = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  if (urlDatabase[templateVar.id]) {
+    res.redirect(templateVar.longURL);
+  }
+  res.redirect('/418');
+});
+
 // GET urls.json
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
