@@ -58,8 +58,21 @@ app.post('/urls', (req, res) => {
     if (err) {
       throw err;
     }
-    console.log("Server updated after post");
+    console.log("Database updated");
     res.redirect(`/urls/${randomString}`);
+  });
+});
+//
+// POST urls/id/delete
+app.post('/urls/:id/delete', (req, res) => {
+  delete urlDatabase[req.params.id];
+  console.log(`url for ${req.params.id} deleted from database!`);
+  fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log('Database updated');
+    res.redirect('/urls');
   });
 });
 //
