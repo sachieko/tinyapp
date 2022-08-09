@@ -53,7 +53,7 @@ app.post('/urls', (req, res) => {
   });
 });
 //
-// POST urls/id/delete
+// DELETE by using POST urls/id/delete (stuck using POST for now)
 app.post('/urls/:id/delete', (req, res) => {
   delete urlDatabase[req.params.id];
   console.log(`url for ${req.params.id} deleted from database!`);
@@ -61,7 +61,20 @@ app.post('/urls/:id/delete', (req, res) => {
     if (err) {
       throw err;
     }
-    console.log('Database updated');
+    console.log('Database updated (DELETE)');
+    res.redirect('/urls');
+  });
+});
+//
+// UPDATE by using POST urls/id/update
+app.post('/urls/:id/update', (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  console.log(`url for ${req.params.id} update reqested!`);
+  fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log('Database updated (UPDATE)');
     res.redirect('/urls');
   });
 });
