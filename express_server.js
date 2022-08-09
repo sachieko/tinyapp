@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan');
+const fs = require('fs');
 
 const generateRandomString = function() {
   let string = '';
@@ -20,11 +21,8 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(':method :url :status'));
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-  "b4k4m1": "http://www.example.com"
-};
+const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
+
 // GET /
 app.get('/', (req, res) => {
   res.send("Hello!");
@@ -52,6 +50,12 @@ app.post('/urls', (req, res) => {
   let randomString = generateRandomString();
   urlDatabase[randomString] = req.body.longURL;
   res.redirect(`/urls/${randomString}`);
+  fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log("Server updated after post");
+  });
 });
 
 // GET urls/:id
