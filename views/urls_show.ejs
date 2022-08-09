@@ -21,6 +21,22 @@
         <p class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a><br>
           Short URL: <a href="/u/<%= id %>">http://localhost:8080/u/<%= id %></a>
+          <div>
+          <h3>Edit Destination URL</h3>
+      <form action="/urls/<%= id %>/update" method="POST">
+        <div class="form-group mb-2">
+          <label for="longURL">Enter a new URL:</label>
+          <input
+            class="form-control"
+            type="text"
+            name="longURL"
+            placeholder="http://"
+            style="width: 300px;margin: auto;"
+          />
+          <br>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div></div>
+      </form>
         </p>
       </div>
       <!-- This has a placeholder link for where to make new URLS -->
