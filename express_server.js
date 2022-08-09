@@ -28,16 +28,6 @@ app.use('/images', express.static('images'));
 const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
 
 //
-// GET /
-app.get('/', (req, res) => {
-  res.send("Hello!");
-});
-//
-// GET hello
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>Waarudo</b></body></html>\n');
-});
-//
 // GET urls
 app.get('/urls', (req, res) => {
   const templateVar = { urls: urlDatabase };
