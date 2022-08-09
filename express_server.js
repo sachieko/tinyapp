@@ -63,10 +63,7 @@ app.get('/urls/:id', (req, res) => {
 // GET u/:id in database
 app.get('/u/:id', (req, res) => {
   const templateVar = { id: req.params.id, longURL: urlDatabase[req.params.id]};
-  if (urlDatabase[templateVar.id]) {
-    res.redirect(templateVar.longURL);
-  }
-  res.redirect('/418');
+  urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
 
 // GET urls.json
