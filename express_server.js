@@ -20,6 +20,7 @@ const generateRandomString = function() {
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan(':method :url :status'));
+app.use('/images', express.static('images'));
 
 const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
 
@@ -73,6 +74,7 @@ app.get('/u/:id', (req, res) => {
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
+
 
 // GET catchall
 app.get('*', (req, res) => {
