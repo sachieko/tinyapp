@@ -4,18 +4,8 @@ const PORT = 8080; // default port 8080
 const morgan = require('morgan');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-
-const generateRandomString = function() {
-  let string = '';
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const charLength = characters.length;
-  // This sets how long all newly generated strings will be for urls. Change if you want longer/shorter
-  const length = 6;
-  for (let i = 0; i < length; i++) {
-    string += characters.charAt(Math.floor(Math.random() * charLength));
-  }
-  return string;
-};
+const newUser = require('user');
+const generateRandomString = require('generateRandomString');
 
 //
 // Middleware
