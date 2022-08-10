@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan');
 const fs = require('fs');
+const cookieParser = require('cookie-parser');
 
 const generateRandomString = function() {
   let string = '';
@@ -22,6 +23,7 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Dev middleware for debugging
 app.use('/images', express.static('images'));
+app.use(cookieParser());
 
 //
 // Create database from file
@@ -38,6 +40,9 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
+//
+// POST login
+
 //
 // POST urls
 app.post('/urls', (req, res) => {
