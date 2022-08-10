@@ -45,6 +45,12 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVar);
 });
 //
+// GET register
+app.get('/register', (req, res) => {
+  const templateVar = { username: req.cookies.username };
+  res.render('registration', templateVar);
+});
+//
 // POST login
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
@@ -120,7 +126,8 @@ app.get('/u/:id', (req, res) => {
 //
 // GET catchall
 app.get('*', (req, res) => {
-  res.status(418).render('418');
+  const templateVar = { username: req.cookies.username };
+  res.status(418).render('418', templateVar);
 });
 // Start server to listen
 app.listen(PORT, () => {

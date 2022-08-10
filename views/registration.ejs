@@ -14,10 +14,27 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+    <!-- Page HTML -->
     <title>TinyApp</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
   </head>
-  <body>
+  <body style="background-color: #212529;color: white;">
+    <%- include('partials/_header') %>
+    <div class="card-body align-items-center">
+      <form style="margin-left: 20px;margin-right: 70%;" action="/register" method="POST">
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
+          <div id="emailHelp" class="form-text">We won't share your email with anyone, not even dogs OR cats!</div>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp">
+          <div id="passwordHelp" class="form-text">Remember to store your password somewhere safe!</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+    </div>
      <!-- Bootstrap JS -->
      <script
      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
