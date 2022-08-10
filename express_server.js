@@ -42,7 +42,10 @@ app.get('/urls/new', (req, res) => {
 });
 //
 // POST login
-
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
+});
 //
 // POST urls
 app.post('/urls', (req, res) => {
