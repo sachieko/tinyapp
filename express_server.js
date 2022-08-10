@@ -4,8 +4,8 @@ const PORT = 8080; // default port 8080
 const morgan = require('morgan');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-const newUser = require('user');
-const generateRandomString = require('generateRandomString');
+const User = require('./user');
+const generateRandomString = require('./generateRandomString');
 
 //
 // Middleware
@@ -41,6 +41,27 @@ app.get('/register', (req, res) => {
   res.render('registration', templateVar);
 });
 //
+// POST register
+app.post('/register', (req, res) => {
+  const username = req.body.username;
+  const email = req.body.email;
+  const password = req.body.password;
+  const userExists = false;
+  if (!userExists) {
+    const uid = generateRandomString(15); // uid should be longer to be more secure, I chose 15
+    userDatabase[uid] = new User(uid, username, email, password);
+    fs.writeFile('userDatabase.json', JSON.stringify(userDatabase), (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log('User Database updated!');
+      res.cookie('username', uid);
+      res.redirect('/urls');
+      return;
+    });
+  }
+});
+//
 // POST login
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
@@ -55,14 +76,14 @@ app.post('/logout', (req, res) => {
 //
 // POST urls
 app.post('/urls', (req, res) => {
-  let randomString = generateRandomString();
+  let randomString = generateRandomString(6); // new Urls are short.
   urlDatabase[randomString] = req.body.longURL;
 
   fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
     if (err) {
       throw err;
     }
-    console.log("Database updated");
+    console.log("URL Database updated");
     res.redirect(`/urls/${randomString}`);
   });
 });

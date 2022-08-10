@@ -23,14 +23,19 @@
     <div class="card-body align-items-center">
       <form style="margin-left: 20px;margin-right: 70%;" action="/register" method="POST">
         <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" name="username" aria-describedby="userHelp">
+          <div id="userHelp" class="form-text text-muted">You will use this to sign in</div>
+        </div>
+        <div class="mb-3">
           <label for="email" class="form-label">Email address</label>
           <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
-          <div id="emailHelp" class="form-text">We won't share your email with anyone, not even dogs OR cats!</div>
+          <div id="emailHelp" class="form-text text-muted">We won't share your email with anyone, not even dogs OR cats!</div>
         </div>
         <div class="mb-3">
           <label for="password" class="form-label">Password</label>
           <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp">
-          <div id="passwordHelp" class="form-text">Remember to store your password somewhere safe!</div>
+          <div id="passwordHelp" class="form-text text-muted">Remember to store your password somewhere safe!</div>
         </div>
         <button type="submit" class="btn btn-primary">Register</button>
       </form>
