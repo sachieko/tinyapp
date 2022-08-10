@@ -52,7 +52,10 @@ app.post('/login', (req, res) => {
 });
 //
 // POST logout
-
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
 //
 // POST urls
 app.post('/urls', (req, res) => {
