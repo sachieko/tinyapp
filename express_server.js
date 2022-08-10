@@ -28,7 +28,7 @@ app.use(cookieParser());
 //
 // Create database from file
 const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
-
+const userDatabase = JSON.parse(fs.readFileSync('userDatabase.json'));
 //
 // GET urls
 app.get('/urls', (req, res) => {
