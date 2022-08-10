@@ -32,13 +32,17 @@ const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
 //
 // GET urls
 app.get('/urls', (req, res) => {
-  const templateVar = { urls: urlDatabase };
+  const templateVar = {
+    urls: urlDatabase,
+    username: req.cookies.username
+  };
   res.render('urls_index', templateVar);
 });
 //
 // GET urls/new
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVar = { username: req.cookies.username };
+  res.render('urls_new', templateVar);
 });
 //
 // POST login
@@ -46,6 +50,9 @@ app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
+//
+// POST logout
+
 //
 // POST urls
 app.post('/urls', (req, res) => {
@@ -89,13 +96,21 @@ app.post('/urls/:id/update', (req, res) => {
 //
 // GET urls/:id
 app.get('/urls/:id', (req, res) => {
-  const templateVar = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  const templateVar = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies.username
+  };
   res.render('urls_show', templateVar);
 });
 //
 // GET u/:id in database
 app.get('/u/:id', (req, res) => {
-  const templateVar = { id: req.params.id, longURL: urlDatabase[req.params.id]};
+  const templateVar = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies.username
+  };
   urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
 //
