@@ -116,11 +116,7 @@ app.get('/u/:id', (req, res) => {
   };
   urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
-//
-// GET urls.json
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
+
 //
 // GET catchall
 app.get('*', (req, res) => {
