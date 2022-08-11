@@ -224,6 +224,7 @@ app.get('*', (req, res) => {
   if (user) { // just incase a user wants to be logged in for the 418 page :)
     const templateVar = { user };
     res.status(418).render('418', templateVar);
+    return;
   }
   res.status(418).render('418', notUser); // Breaks header if missing
 });
