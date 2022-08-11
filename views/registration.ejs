@@ -20,8 +20,8 @@
   </head>
   <body style="background-color: #212529;color: white;">
     <%- include('partials/_header') %>
-    <% if (invalidEntry) { %>
-      <div class="alert alert-danger" role="alert" style="margin-top: 1%;">
+    <% if (invalidEntry === 0) { %>
+      <div class="alert alert-danger" role="alert" style="margin-top: 1%;margin-left: 3%;margin-right: 65%;">
         That email or password combination is invalid or already registered, sorry!
       </div>
     <% }; %>

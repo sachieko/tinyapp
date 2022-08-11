@@ -20,11 +20,16 @@
   </head>
   <body style="background-color: #212529;color: white;">
     <%- include('partials/_header') %>
-    <% if (invalidEntry) { %>
-      <div class="alert alert-danger" role="alert" style="margin-top: 1%;">
+    <% if (invalidEntry === 0) { %>
+      <div class="alert alert-danger" role="alert" style="margin-top: 1%;margin-left: 3%;margin-right: 75%;">
         That email or password combination is invalid.
       </div>
     <% }; %>
+    <% if (invalidEntry === 1) { %>
+      <div class="alert alert-danger" role="alert" style="margin-top: 1%;margin-left: 3%;margin-right: 80%;">
+        You need to be <b>logged in</b> to do that!
+      </div>
+      <% }; %>
     <div class="card-body align-items-center">
       <h2 style="margin-left: 20px;">Login</h2>
       <form style="margin-left: 20px;margin-right: 70%;" action="/login" method="POST">

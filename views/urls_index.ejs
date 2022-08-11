@@ -24,11 +24,18 @@
       <div class="alert alert-dark" role="alert">
         Your saved URLs are below<%= ', ' + user.email %>!
       </div>
+      <% if (typeof meddling == 'boolean') { %>
+        <div class="alert alert-danger" role="alert" style="margin-top: 1%;margin-right: 40%;">
+          You can't edit someone else's links. You could lose your account privileges if you do this.
+        </div>
+      <% }; %>
       <table class="table table-dark table-hover">
         <thead>
           <tr>
             <th scope="col">Short URL ID</th>
+            <th scope="col">Short URL</th>
             <th scope="col">Long URL</th>
+            <th scope="col">Times Used</th>
             <th scope="col">Edit</th>
             <th scope="col">Delete</th>
           </tr>
@@ -37,9 +44,11 @@
           <% for (let id in urls) { %>
             <tr>
               <td><a class="list-group-item list-group-item-action list-group-item-dark" href="/u/<%= id %>"><%= id %></a></td>
-              <td><a class= "list-group-item list-group-item-action list-group-item-dark" href="<%= urls[id] %>"><%= urls[id] %></a></td>
-              <td><form method="GET" action="/urls/<%= id %>"><button class="btn btn-primary" type="submit" name="Edit">Edit</button></form></td>
-              <td><form method="POST" action="/urls/<%= id %>/delete"><button class="btn btn-danger" type="submit" name="Delete">Delete</button></form></td>
+              <td><a class="list-group-item list-group-item-action list-group-item-dark" href="/u/<%= id %>">http://localhost:8080/<%= id %></a></td>
+              <td><a class= "list-group-item list-group-item-action list-group-item-dark" href="<%= urls[id] %>"><%= urls[id].longURL %></a></td>
+              <td><p class="list-group-item list-group-item-action list-group-item-dark"><%= urls[id].useCount %></p></td>
+              <td><form method="GET" action="/urls/<%= id %>"><button class="btn btn-primary" style="height: 50px;" type="submit" name="Edit">Edit</button></form></td>
+              <td><form method="POST" action="/urls/<%= id %>/delete"><button class="btn btn-danger" style="height: 50px;" type="submit" name="Delete">Delete</button></form></td>
             </tr>
           <% } %>
         </tbody>
