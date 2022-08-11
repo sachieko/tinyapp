@@ -22,7 +22,7 @@
     <%- include('partials/_header') %>
     <% if (userExists) { %>
       <div class="alert alert-danger" role="alert" style="margin-top: 1%;">
-        That email is already registered, sorry!
+        That email or password combination is invalid or already registered, sorry!
       </div>
     <% }; %>
     <div class="card-body align-items-center">
@@ -37,7 +37,7 @@
           <input type="password" class="form-control" id="password" name="password" aria-describedby="passwordHelp">
           <div id="passwordHelp" class="form-text text-muted">Remember to store your password somewhere safe!</div>
         </div>
-        <button type="submit" class="btn btn-primary">Register</button>
+        <button type="submit" class="btn btn-success">Register</button>
       </form>
     </div>
      <!-- Bootstrap JS -->
