@@ -81,7 +81,7 @@ app.get('/login', (req, res) => {
   res.render('login', templateVar);
 });
 //
-// POST login NOT REFACTORED YET
+// POST login
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -91,7 +91,7 @@ app.post('/login', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.redirect('/login');
+  res.status(401).render('login', { user: undefined }); // Have to use render to post 401 status
 });
 //
 // POST logout
