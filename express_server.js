@@ -6,7 +6,7 @@ const fs = require('fs');
 const cookieParser = require('cookie-parser');
 const User = require('./user');
 const generateRandomString = require('./generateRandomString');
-const valueExists = require('./valueExists');
+const findKey = require('./findKey');
 
 //
 // Middleware
@@ -36,8 +36,8 @@ app.get('/urls', (req, res) => {
 //
 // GET urls/new
 app.get('/urls/new', (req, res) => {
-  if (userDatabase[req.cookies.username]) {
-    const templateVar = { username: userDatabase[req.cookies.user].email };
+  if (userDatabase[req.cookies.user]) {
+    const templateVar = { user: userDatabase[req.cookies.user] };
     res.render('urls_new', templateVar);
     return;
   }
@@ -46,7 +46,7 @@ app.get('/urls/new', (req, res) => {
 //
 // GET register
 app.get('/register', (req, res) => {
-  const templateVar = { user: undefined, userExists: undefined };
+  const templateVar = { user: undefined, userExists: undefined }; // If someone is registering they aren't currently a user
   res.render('registration', templateVar);
 });
 //
@@ -54,7 +54,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const userExists = valueExists(userDatabase, (key) =>  userDatabase[key].email === email);
+  const userExists = findKey(userDatabase, (key) =>  userDatabase[key].email === email);
   if (userExists || email === '' || password === '') { // Catch users trying to use blank email or passwords here
     const templateVar = { user: undefined, userExists };
     res.status(400).render('registration', templateVar);
@@ -74,13 +74,24 @@ app.post('/register', (req, res) => {
     });
   }
 });
-
-
+//
+// GET login
+app.get('/login', (req, res) => {
+  const templateVar = { user: undefined };
+  res.render('login', templateVar);
+});
 //
 // POST login NOT REFACTORED YET
 app.post('/login', (req, res) => {
-
-  res.redirect('/urls');
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = findKey(userDatabase, (key) => userDatabase[key].email === email);
+  if (userDatabase[user].password === password) {
+    res.cookie('user', user);
+    res.redirect('/urls');
+    return;
+  }
+  res.redirect('/login');
 });
 //
 // POST logout
