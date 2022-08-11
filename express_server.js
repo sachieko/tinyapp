@@ -3,12 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
 const cookieSession = require('cookie-session');
-const User = require('./user'); // Used to register new users
-const Url = require('./urlClass'); // Used to register new URLs
-const generateRandomString = require('./generateRandomString');
-const getUserByEmail = require('./getUserByEmail'); // find key via findKey(object, callback)
-const updateDatabase = require('./updateDatabase'); // Used to update database json files.
-const urlsForUser = require("./urlsForUser"); // Filters object to only have keys meeting a string input
+const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
 
 //            //
@@ -164,18 +159,18 @@ app.post('/urls', (req, res) => {
 
 app.post('/urls/:id/update', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
-  const url = urlDatabase[req.params.id];
-  if (user && url.userID === user.uid) {
+  const urls = urlsForUser(user.uid, urlDatabase);
+  const url = urls[req.params.id];
+  if (user && url) { // If user and url is theirs
     url.longURL = req.body.longURL;
-    url.useCount = 0;
+    url.useCount = 0; // reset;
     console.log(`url for ${req.params.id} update reqested!`);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
     }, 'URL Database updated (POST URL)');
     return;
   }
-  if (user && url.userID !== user.uid) {
-    const urls = urlsForUser(user.uid, urlDatabase);
+  if (user && !url) {
     const templateVar = {
       urls,
       user,
@@ -191,8 +186,8 @@ app.post('/urls/:id/update', (req, res) => {
 
 app.post('/urls/:id/delete', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
-  const url = urlDatabase[req.params.id];
   const urls = urlsForUser(user.uid, urlDatabase);
+  const url = urls[req.params.id];
   if (user && url.userID === user.uid) {
     delete urlDatabase[req.params.id];
     console.log(`url for ${req.params.id} deleted from database!`);
@@ -218,9 +213,9 @@ app.post('/urls/:id/delete', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
-  const url = urlDatabase[req.params.id];
   const urls = urlsForUser(user.uid, urlDatabase);
-  if (user && url.userID === user.uid) {
+  const url = urls[req.params.id];
+  if (user && url) { // The specific url must be in the users urls.
     const templateVar = {
       id: req.params.id,
       url,
@@ -229,7 +224,7 @@ app.get('/urls/:id', (req, res) => {
     res.render('urls_show', templateVar);
     return;
   }
-  if (user && url.userID !== user.uid) {
+  if (user && !url) { // If they're a user but it's not a url owned by them they're meddlers.
     const templateVar = {
       urls,
       user,
