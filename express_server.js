@@ -6,6 +6,7 @@ const fs = require('fs');
 const cookieParser = require('cookie-parser');
 const User = require('./user');
 const generateRandomString = require('./generateRandomString');
+const valueExists = require('./valueExists');
 
 //
 // Middleware
@@ -22,55 +23,69 @@ const userDatabase = JSON.parse(fs.readFileSync('userDatabase.json'));
 //
 // GET urls
 app.get('/urls', (req, res) => {
-  const templateVar = {
-    urls: urlDatabase,
-    username: req.cookies.username
-  };
-  res.render('urls_index', templateVar);
+  if (userDatabase[req.cookies.user]) {
+    const templateVar = {
+      urls: urlDatabase,
+      user: userDatabase[req.cookies.user]
+    };
+    res.render('urls_index', templateVar);
+    return;
+  }
+  res.redirect('/register');
 });
 //
 // GET urls/new
 app.get('/urls/new', (req, res) => {
-  const templateVar = { username: req.cookies.username };
-  res.render('urls_new', templateVar);
+  if (userDatabase[req.cookies.username]) {
+    const templateVar = { username: userDatabase[req.cookies.user].email };
+    res.render('urls_new', templateVar);
+    return;
+  }
+  res.redirect('/register');
 });
 //
 // GET register
 app.get('/register', (req, res) => {
-  const templateVar = { username: req.cookies.username };
+  const templateVar = { user: undefined, userExists: undefined };
   res.render('registration', templateVar);
 });
 //
 // POST register
 app.post('/register', (req, res) => {
-  const username = req.body.username;
   const email = req.body.email;
   const password = req.body.password;
-  const userExists = false;
+  const userExists = valueExists(userDatabase, (key) =>  userDatabase[key].email === email);
+  if (userExists || email === '' || password === '') { // Catch users trying to use blank email or passwords here
+    const templateVar = { user: undefined, userExists };
+    res.status(400).render('registration', templateVar);
+    return;
+  }
   if (!userExists) {
-    const uid = generateRandomString(15); // uid should be longer to be more secure, I chose 15
-    userDatabase[uid] = new User(uid, username, email, password);
+    const uid = generateRandomString(15); // uid should be long to be more 'secure', I chose 15 chars
+    userDatabase[uid] = new User(uid, email, password);
     fs.writeFile('userDatabase.json', JSON.stringify(userDatabase), (err) => {
       if (err) {
         throw err;
       }
       console.log('User Database updated!');
-      res.cookie('username', uid);
+      res.cookie('user', uid);
       res.redirect('/urls');
       return;
     });
   }
 });
+
+
 //
-// POST login
+// POST login NOT REFACTORED YET
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
+
   res.redirect('/urls');
 });
 //
 // POST logout
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user');
   res.redirect('/urls');
 });
 //
@@ -78,7 +93,6 @@ app.post('/logout', (req, res) => {
 app.post('/urls', (req, res) => {
   let randomString = generateRandomString(6); // new Urls are short.
   urlDatabase[randomString] = req.body.longURL;
-
   fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
     if (err) {
       throw err;
@@ -119,7 +133,7 @@ app.get('/urls/:id', (req, res) => {
   const templateVar = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies.username
+    user: userDatabase[req.cookies.user]
   };
   res.render('urls_show', templateVar);
 });
@@ -129,7 +143,7 @@ app.get('/u/:id', (req, res) => {
   const templateVar = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies.username
+    username: userDatabase[req.cookies.user]
   };
   urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
@@ -137,8 +151,11 @@ app.get('/u/:id', (req, res) => {
 //
 // GET catchall
 app.get('*', (req, res) => {
-  const templateVar = { username: req.cookies.username };
-  res.status(418).render('418', templateVar);
+  if (userDatabase[req.cookies.user]) {
+    const templateVar = { user: userDatabase[req.cookies.user] };
+    res.status(418).render('418', templateVar);
+  }
+  res.status(418).render('418', { user: undefined });
 });
 // Start server to listen
 app.listen(PORT, () => {

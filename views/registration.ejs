@@ -20,13 +20,13 @@
   </head>
   <body style="background-color: #212529;color: white;">
     <%- include('partials/_header') %>
+    <% if (userExists) { %>
+      <div class="alert alert-danger" role="alert" style="margin-top: 1%;">
+        That email is already registered, sorry!
+      </div>
+    <% }; %>
     <div class="card-body align-items-center">
       <form style="margin-left: 20px;margin-right: 70%;" action="/register" method="POST">
-        <div class="mb-3">
-          <label for="username" class="form-label">Username</label>
-          <input type="text" class="form-control" id="username" name="username" aria-describedby="userHelp">
-          <div id="userHelp" class="form-text text-muted">You will use this to sign in</div>
-        </div>
         <div class="mb-3">
           <label for="email" class="form-label">Email address</label>
           <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
