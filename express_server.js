@@ -18,19 +18,21 @@ app.use('/images', express.static('images'));
 app.use(cookieParser());
 
 //
-// Create database from file
+// Create databases from local storage.
 const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
 const userDatabase = JSON.parse(fs.readFileSync('userDatabase.json'));
 
+const notUser = { user: undefined, userExists: true }; // Used to prevent header from breaking since _header.ejs uses user object
+
 //                                    //
-// ANYONE CAN ACCESS THE BELOW PATHS  //
+// NON-USERS CAN ACCESS THESE PATHS   //
 //                                    //
 
 
 // GET login
 
 app.get('/login', (req, res) => {
-  const templateVar = { user: undefined }; // Breaks header if missing
+  const templateVar = notUser; // Breaks header if missing
   res.render('login', templateVar);
 });
 
@@ -40,20 +42,24 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email ? req.body.email : undefined;
   const password = req.body.password;
-  const user = findKey(userDatabase, (key) => userDatabase[key].email === email && userDatabase[key].password === password); // both email/Pw must match
+  const user = findKey(userDatabase, (key) => userDatabase[key].email === email && userDatabase[key].password === password); // both email/Pw must match to return user
   if (user) {
     res.cookie('user_id', user);
     res.redirect('/urls');
     return;
   }
-  res.status(403).render('login', { user: undefined }); // Have to use render to post 403 status
+  res.status(403).render('login', notUser); // Have to use render to post 403 status
 });
 
 // GET register
 
 app.get('/register', (req, res) => {
-  const templateVar = { user: undefined, userExists: undefined }; // If someone is registering they aren't currently a user, breaks header if missing
-  res.render('registration', templateVar);
+  const user = userDatabase[req.cookies.user_id]; // If someone is registering they aren't currently a user, breaks header if missing
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
+  res.render('registration', notUser);
 });
 
 // POST register
@@ -63,7 +69,7 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   const userExists = findKey(userDatabase, (key) =>  userDatabase[key].email === email);
   if (userExists || email === '' || password === '') { // Catch users trying to use blank email or passwords here
-    const templateVar = { user: undefined, userExists };
+    const templateVar = notUser;
     res.status(400).render('registration', templateVar);
     return;
   }
@@ -89,15 +95,16 @@ app.post('/register', (req, res) => {
 // GET urls
 
 app.get('/urls', (req, res) => {
-  if (userDatabase[req.cookies.user_id]) {
+  const user = userDatabase[req.cookies.user_id];
+  if (user) {
     const templateVar = {
       urls: urlDatabase,
-      user: userDatabase[req.cookies.user_id]
+      user
     };
     res.render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', { user: undefined }); // Have to use render to post 403 status
+  res.status(403).render('login', notUser); // Have to use render to post 403 status
 });
 
 // GET urls/new
@@ -105,11 +112,11 @@ app.get('/urls', (req, res) => {
 app.get('/urls/new', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
   if (user) {
-    const templateVar = { user: userDatabase[req.cookies.user_id] };
+    const templateVar = { user };
     res.render('urls_new', templateVar);
     return;
   }
-  res.status(403).render('login', { user: undefined });
+  res.status(403).render('login', notUser);
 });
 
 
@@ -136,55 +143,74 @@ app.post('/urls', (req, res) => {
     });
     return;
   }
-  res.status(403).render('login', { user: undefined });
+  res.status(403).render('login', notUser);
 });
 
 // DELETE by using POST urls/id/delete (stuck using POST for now)
 
 app.post('/urls/:id/delete', (req, res) => {
-  delete urlDatabase[req.params.id];
-  console.log(`url for ${req.params.id} deleted from database!`);
-  fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
-    if (err) {
-      throw err;
-    }
-    console.log('Database updated (DELETE)');
-    res.redirect('/urls');
-  });
+  const user = userDatabase[req.cookies.user_id];
+  if (user) {
+    delete urlDatabase[req.params.id];
+    console.log(`url for ${req.params.id} deleted from database!`);
+    fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log('Database updated (DELETE)');
+      res.redirect('/urls');
+    });
+    return;
+  }
+  res.status(403).render('login', notUser);
 });
 
 // UPDATE by using POST urls/id/update
 
 app.post('/urls/:id/update', (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
-  console.log(`url for ${req.params.id} update reqested!`);
-  fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
-    if (err) {
-      throw err;
-    }
-    console.log('Database updated (UPDATE)');
-    res.redirect('/urls');
-  });
+  const user = userDatabase[req.cookies.user_id];
+  if (user) {
+    urlDatabase[req.params.id] = req.body.longURL;
+    console.log(`url for ${req.params.id} update reqested!`);
+    fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
+      if (err) {
+        throw err;
+      }
+      console.log('Database updated (UPDATE)');
+      res.redirect('/urls');
+    });
+    return;
+  }
+  res.status(403).render('login', notUser);
 });
 
 // GET urls/:id
 
 app.get('/urls/:id', (req, res) => {
-  const templateVar = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    user: userDatabase[req.cookies.user_id]
-  };
-  res.render('urls_show', templateVar);
+  const user = userDatabase[req.cookies.user_id];
+  if (user) {
+    const templateVar = {
+      id: req.params.id,
+      longURL: urlDatabase[req.params.id],
+      user: userDatabase[req.cookies.user_id]
+    };
+    res.render('urls_show', templateVar);
+    return;
+  }
+  res.status(403).render('login', notUser);
 });
 
-// GET u/:id in database
+//                                 //
+// Non-specific Userless endpoints //
+//                                 //
+
+// GET u/id - Redirect anyone with link elsewhere, so that users can share these links with friends/followers.
+// redirects anyone with link to users desired destination.
 
 app.get('/u/:id', (req, res) => {
   const templateVar = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    user: userDatabase[req.cookies.user_id]
   };
   urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
@@ -200,7 +226,7 @@ app.get('*', (req, res) => {
     const templateVar = { user: userDatabase[req.cookies.user_id] };
     res.status(418).render('418', templateVar);
   }
-  res.status(418).render('418', { user: undefined }); // Breaks header if missing
+  res.status(418).render('418', notUser); // Breaks header if missing
 });
 // Start server to listen
 app.listen(PORT, () => {
