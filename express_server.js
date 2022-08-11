@@ -21,7 +21,8 @@ app.use(cookieParser());
 // Create databases from local storage.
 const urlDatabase = require('./urlDatabase.json');
 const userDatabase = require('./userDatabase.json');
-
+const urlLength = 4; // Sets minimum length of new urls
+const uidLength = 15; // Sets minimum length of new user ids
 
 // Blank templates for when someone is not signed in.
 const notUser = { user: undefined, invalidEntry: undefined }; // Used to prevent header from breaking since _header.ejs uses user object
@@ -81,7 +82,10 @@ app.post('/register', (req, res) => {
     return;
   }
   if (!userExists) {
-    const uid = generateRandomString(15); // uid should be long to be more 'secure', I chose 15 chars
+    let uid = generateRandomString(uidLength); // uid should be long to be more 'secure', I chose 15 chars
+    while (userDatabase[uid]) {
+      uid += generateRandomString(1);
+    }
     userDatabase[uid] = new User(uid, email, password);
     updateDatabase('userDatabase.json', userDatabase, () => {
       res.cookie('user_id', uid);
@@ -135,7 +139,10 @@ app.post('/logout', (req, res) => {
 app.post('/urls', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
   if (user) {
-    let randomString = generateRandomString(6); // new Urls are short.
+    let randomString = generateRandomString(urlLength);
+    while (urlDatabase[randomString]) { // Prevents duplicate urls
+      randomString += generateRandomString(1);
+    }
     urlDatabase[randomString] = req.body.longURL;
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect(`/urls/${randomString}`);
