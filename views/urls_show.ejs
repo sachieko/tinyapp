@@ -17,10 +17,11 @@
     <%- include('partials/_header') %>
     <div class="card text-center">
       <div class="card-body" style="background-color: #212529; color:white;">
-        <h3 class="card-title">TinyURL for: <%= longURL %></h3>
+        <h3 class="card-title">TinyURL for: <%= url.longURL %></h3>
         <h4 class="card-text">
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a><br><br>
-          Short URL: <a href="/u/<%= id %>">http://localhost:8080/u/<%= id %></a>
+          Short URL: <a href="/u/<%= id %>">http://localhost:8080/u/<%= id %></a><br><br>
+          Times used: <%= url.useCount %><br>
           <div class="card-header">
 
       </div>
@@ -39,6 +40,7 @@
             <button type="submit" class="btn btn-primary">Submit</button>
           </div>
         </form>
+        <div class="card-footer text-danger">Warning, editing the url resets its times used and cannot be undone!</div>
       </div>
     <!-- Bootstrap JS -->
     <script
