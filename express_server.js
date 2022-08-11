@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
@@ -7,8 +7,9 @@ const User = require('./user'); // Used to register new users
 const Url = require('./urlClass'); // Used to register new URLs
 const generateRandomString = require('./generateRandomString');
 const findKey = require('./findKey'); // find key via findKey(object, callback)
-const updateDatabase = require("./updateDatabase"); // Used to update database json files.
+const updateDatabase = require('./updateDatabase'); // Used to update database json files.
 const urlsForUser = require("./urlsForUser"); // Filters object to only have keys meeting a string input
+const bcrypt = require('bcryptjs');
 
 //            //
 // Middleware //
@@ -53,8 +54,8 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const email = req.body.email ? req.body.email : undefined;
-  const password = req.body.password;
-  const user = findKey(userDatabase, (key) => userDatabase[key].email === email && userDatabase[key].password === password); // both email/Pw must match to return user
+  // both email/Pw must match to return user
+  const user = findKey(userDatabase, (key) => userDatabase[key].email === email && bcrypt.compareSync(req.body.password, userDatabase[key].password));
   if (user) {
     res.cookie('user_id', user);
     res.redirect('/urls');
@@ -78,7 +79,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, 10);
   const userExists = findKey(userDatabase, (key) =>  userDatabase[key].email === email);
   if (userExists || email === '' || password === '') { // Catch users trying to use blank email or passwords here
     res.status(400).render('registration', invalidUser);
