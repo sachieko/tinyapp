@@ -20,7 +20,11 @@
   </head>
   <body style="background-color: #212529;color: white;">
     <%- include('partials/_header') %>
- 
+    <% if (invalidEntry) { %>
+      <div class="alert alert-danger" role="alert" style="margin-top: 1%;">
+        That email or password combination is invalid.
+      </div>
+    <% }; %>
     <div class="card-body align-items-center">
       <h2 style="margin-left: 20px;">Login</h2>
       <form style="margin-left: 20px;margin-right: 70%;" action="/login" method="POST">
