@@ -2,11 +2,11 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const User = require('./user'); // Used to register new users
 const Url = require('./urlClass'); // Used to register new URLs
 const generateRandomString = require('./generateRandomString');
-const findKey = require('./findKey'); // find key via findKey(object, callback)
+const getUserByEmail = require('./getUserByEmail'); // find key via findKey(object, callback)
 const updateDatabase = require('./updateDatabase'); // Used to update database json files.
 const urlsForUser = require("./urlsForUser"); // Filters object to only have keys meeting a string input
 const bcrypt = require('bcryptjs');
@@ -18,7 +18,10 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Dev middleware for debugging
 app.use('/images', express.static('images'));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'tinyApp',
+  keys: ['ImisslivinginJapanbecausethefoodwascheap$$andlike$5adaytoeatout','thefunniestnumbersare6942066677andthecoolestis4']
+}));
 
 //
 // Create databases from local storage.
@@ -40,7 +43,7 @@ const loginPlease = { user: undefined, invalidEntry: 1 }; // Used to display ale
 // GET login
 
 app.get('/login', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   if (user) {
     res.redirect('/urls');
     return;
@@ -55,9 +58,9 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email ? req.body.email : undefined;
   // both email/Pw must match to return user
-  const user = findKey(userDatabase, (key) => userDatabase[key].email === email && bcrypt.compareSync(req.body.password, userDatabase[key].password));
-  if (user) {
-    res.cookie('user_id', user);
+  const user = getUserByEmail(userDatabase, email);
+  if (user && bcrypt.compareSync(req.body.password, userDatabase[user].password)) {
+    req.session["user_id"] = user;
     res.redirect('/urls');
     return;
   }
@@ -67,7 +70,7 @@ app.post('/login', (req, res) => {
 // GET register
 
 app.get('/register', (req, res) => {
-  const user = userDatabase[req.cookies.user_id]; // If someone is registering they aren't currently a user, breaks header if missing
+  const user = userDatabase[req.session["user_id"]]; // If someone is registering they aren't currently a user, breaks header if missing
   if (user) {
     res.redirect('/urls');
     return;
@@ -79,9 +82,9 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   const email = req.body.email;
-  const password = bcrypt.hashSync(req.body.password, 10);
-  const userExists = findKey(userDatabase, (key) =>  userDatabase[key].email === email);
-  if (userExists || email === '' || password === '') { // Catch users trying to use blank email or passwords here
+  const passwordHash = bcrypt.hashSync(req.body.password, 10);
+  const userExists = getUserByEmail(userDatabase, email);
+  if (userExists || email === '' || req.body.password === '') { // Catch users trying to use blank email or passwords here
     res.status(400).render('registration', invalidUser);
     return;
   }
@@ -90,9 +93,9 @@ app.post('/register', (req, res) => {
     while (userDatabase[uid]) { // Prevents duplicate user ids
       uid += generateRandomString(1);
     }
-    userDatabase[uid] = new User(uid, email, password);
+    userDatabase[uid] = new User(uid, email, passwordHash);
     updateDatabase('userDatabase.json', userDatabase, () => {
-      res.cookie('user_id', uid);
+      req.session["user_id"] = uid;
       res.redirect('/urls');
     }, "Updated User Database (POST new user)");
     return;
@@ -106,7 +109,7 @@ app.post('/register', (req, res) => {
 // GET urls
 
 app.get('/urls', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   if (user) {
     const urls = urlsForUser(user.uid, urlDatabase);
     const templateVar = {
@@ -122,7 +125,7 @@ app.get('/urls', (req, res) => {
 // GET urls/new
 
 app.get('/urls/new', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   if (user) {
     const templateVar = { user };
     res.render('urls_new', templateVar);
@@ -135,14 +138,14 @@ app.get('/urls/new', (req, res) => {
 // POST logout
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 
 // POST urls
 
 app.post('/urls', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   if (user) {
     let randomString = generateRandomString(urlLength);
     while (urlDatabase[randomString]) { // Prevents duplicate urls
@@ -160,7 +163,7 @@ app.post('/urls', (req, res) => {
 // UPDATE by using POST urls/id/update
 
 app.post('/urls/:id/update', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   const url = urlDatabase[req.params.id];
   if (user && url.userID === user.uid) {
     url.longURL = req.body.longURL;
@@ -187,7 +190,7 @@ app.post('/urls/:id/update', (req, res) => {
 // DELETE by using POST urls/id/delete (stuck using POST for now)
 
 app.post('/urls/:id/delete', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   const url = urlDatabase[req.params.id];
   const urls = urlsForUser(user.uid, urlDatabase);
   if (user && url.userID === user.uid) {
@@ -214,7 +217,7 @@ app.post('/urls/:id/delete', (req, res) => {
 // GET urls/:id
 
 app.get('/urls/:id', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   const url = urlDatabase[req.params.id];
   const urls = urlsForUser(user.uid, urlDatabase);
   if (user && url.userID === user.uid) {
@@ -264,7 +267,7 @@ app.get('/u/:id', (req, res) => {
 // GET catchall
 
 app.get('*', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
+  const user = userDatabase[req.session["user_id"]];
   if (user) { // just incase a user is logged in for the 418 page :)
     const templateVar = { user };
     res.status(418).render('418', templateVar);
