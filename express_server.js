@@ -4,6 +4,7 @@ const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
 const cookieParser = require('cookie-parser');
 const User = require('./user'); // Used to register new users
+const Url = require('./urlClass.js'); // Used to register new URLs
 const generateRandomString = require('./generateRandomString');
 const findKey = require('./findKey'); // find key via findKey(object, callback)
 const updateDatabase = require("./updateDatabase"); // Used to update database json files.
@@ -57,7 +58,7 @@ app.post('/login', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.status(403).render('login', invalidUser); // Have to use render to post 403 status
+  res.status(403).render('login', invalidUser); // Have to use render to send 403 status
 });
 
 // GET register
@@ -82,8 +83,8 @@ app.post('/register', (req, res) => {
     return;
   }
   if (!userExists) {
-    let uid = generateRandomString(uidLength); // uid should be long to be more 'secure', I chose 15 chars
-    while (userDatabase[uid]) {
+    let uid = generateRandomString(uidLength);
+    while (userDatabase[uid]) { // Prevents duplicate user ids
       uid += generateRandomString(1);
     }
     userDatabase[uid] = new User(uid, email, password);
@@ -111,7 +112,7 @@ app.get('/urls', (req, res) => {
     res.render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', notUser); // Have to use render to post 403 status
+  res.status(403).render('login', notUser); // Have to use render to send 403 status
 });
 
 // GET urls/new
@@ -143,7 +144,7 @@ app.post('/urls', (req, res) => {
     while (urlDatabase[randomString]) { // Prevents duplicate urls
       randomString += generateRandomString(1);
     }
-    urlDatabase[randomString] = req.body.longURL;
+    urlDatabase[randomString] = new Url(req.body.longURL, user.uid);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect(`/urls/${randomString}`);
     }, "URL Database updated (POST new URL)");
@@ -172,7 +173,7 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/urls/:id/update', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
   if (user) {
-    urlDatabase[req.params.id] = req.body.longURL;
+    urlDatabase[req.params.id].longURL = req.body.longURL;
     console.log(`url for ${req.params.id} update reqested!`);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
@@ -189,7 +190,7 @@ app.get('/urls/:id', (req, res) => {
   if (user) {
     const templateVar = {
       id: req.params.id,
-      longURL: urlDatabase[req.params.id],
+      longURL: urlDatabase[req.params.id].longURL,
       user
     };
     res.render('urls_show', templateVar);
@@ -208,7 +209,7 @@ app.get('/urls/:id', (req, res) => {
 app.get('/u/:id', (req, res) => {
   const templateVar = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
   };
   urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
