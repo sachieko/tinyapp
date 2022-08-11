@@ -4,10 +4,11 @@ const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
 const cookieParser = require('cookie-parser');
 const User = require('./user'); // Used to register new users
-const Url = require('./urlClass.js'); // Used to register new URLs
+const Url = require('./urlClass'); // Used to register new URLs
 const generateRandomString = require('./generateRandomString');
 const findKey = require('./findKey'); // find key via findKey(object, callback)
 const updateDatabase = require("./updateDatabase"); // Used to update database json files.
+const urlsForUser = require("./urlsForUser"); // Filters object to only have keys meeting a string input
 
 //            //
 // Middleware //
@@ -27,7 +28,8 @@ const uidLength = 15; // Sets minimum length of new user ids
 
 // Blank templates for when someone is not signed in.
 const notUser = { user: undefined, invalidEntry: undefined }; // Used to prevent header from breaking since _header.ejs uses user object
-const invalidUser = { user: undefined, invalidEntry: true }; // Used to display alert on invalid registrations
+const invalidUser = { user: undefined, invalidEntry: 0 }; // Used to display alert on invalid registrations
+const loginPlease = { user: undefined, invalidEntry: 1 }; // Used to display alert for triyng GET urls without logging in.
 
 //                                    //
 // NON-USERS PATHS BELOW              //
@@ -97,7 +99,7 @@ app.post('/register', (req, res) => {
 });
 
 //                                    //
-// USER PATHS BELOW                   //
+// USER PATHS                         //
 //                                    //
 
 // GET urls
@@ -105,14 +107,15 @@ app.post('/register', (req, res) => {
 app.get('/urls', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
   if (user) {
+    const urls = urlsForUser(user.uid, urlDatabase);
     const templateVar = {
-      urls: urlDatabase,
+      urls,
       user
     };
     res.render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', notUser); // Have to use render to send 403 status
+  res.status(403).render('login', loginPlease); // Have to use render to send 403 status
 });
 
 // GET urls/new
@@ -124,7 +127,7 @@ app.get('/urls/new', (req, res) => {
     res.render('urls_new', templateVar);
     return;
   }
-  res.status(403).render('login', notUser);
+  res.status(403).render('login', loginPlease);
 });
 
 
@@ -150,14 +153,43 @@ app.post('/urls', (req, res) => {
     }, "URL Database updated (POST new URL)");
     return;
   }
-  res.status(403).render('login', notUser);
+  res.status(403).render('login', loginPlease);
 });
 
+// UPDATE by using POST urls/id/update
+
+app.post('/urls/:id/update', (req, res) => {
+  const user = userDatabase[req.cookies.user_id];
+  const url = urlDatabase[req.params.id];
+  if (user && url.userID === user.uid) {
+    url.longURL = req.body.longURL;
+    url.useCount = 0;
+    console.log(`url for ${req.params.id} update reqested!`);
+    updateDatabase('urlDatabase.json', urlDatabase, () => {
+      res.redirect('/urls');
+    }, 'URL Database updated (POST URL)');
+    return;
+  }
+  if (user && url.userID !== user.uid) {
+    const urls = urlsForUser(user.uid, urlDatabase);
+    const templateVar = {
+      urls,
+      user,
+      meddling: true
+    };
+    console.log(`User: ${user.email} is meddling`);
+    res.status(401).render('urls_index', templateVar);
+    return;
+  }
+  res.status(403).render('login', loginPlease);
+});
 // DELETE by using POST urls/id/delete (stuck using POST for now)
 
 app.post('/urls/:id/delete', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
-  if (user) {
+  const url = urlDatabase[req.params.id];
+  const urls = urlsForUser(user.uid, urlDatabase);
+  if (user && url.userID === user.uid) {
     delete urlDatabase[req.params.id];
     console.log(`url for ${req.params.id} deleted from database!`);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
@@ -165,38 +197,45 @@ app.post('/urls/:id/delete', (req, res) => {
     }, "URL Database POST (DELETE URL)");
     return;
   }
-  res.status(403).render('login', notUser);
-});
-
-// UPDATE by using POST urls/id/update
-
-app.post('/urls/:id/update', (req, res) => {
-  const user = userDatabase[req.cookies.user_id];
-  if (user) {
-    urlDatabase[req.params.id].longURL = req.body.longURL;
-    console.log(`url for ${req.params.id} update reqested!`);
-    updateDatabase('urlDatabase.json', urlDatabase, () => {
-      res.redirect('/urls');
-    }, 'URL Database updated (POST URL)');
+  if (user && url.userID !== user.uid) {
+    const templateVar = {
+      urls,
+      user,
+      meddling: true
+    };
+    console.log(`User: ${user.email} is meddling`);
+    res.status(401).render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', notUser);
+  res.status(403).render('login', loginPlease);
 });
 
 // GET urls/:id
 
 app.get('/urls/:id', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
-  if (user) {
+  const url = urlDatabase[req.params.id];
+  const urls = urlsForUser(user.uid, urlDatabase);
+  if (user && url.userID === user.uid) {
     const templateVar = {
       id: req.params.id,
-      longURL: urlDatabase[req.params.id].longURL,
+      url,
       user
     };
     res.render('urls_show', templateVar);
     return;
   }
-  res.status(403).render('login', notUser);
+  if (user && url.userID !== user.uid) {
+    const templateVar = {
+      urls,
+      user,
+      meddling: true
+    };
+    console.log(`User: ${user.email} is meddling`);
+    res.status(401).render('urls_index', templateVar);
+    return;
+  }
+  res.status(403).render('login', loginPlease);
 });
 
 //                                 //
@@ -207,11 +246,14 @@ app.get('/urls/:id', (req, res) => {
 // redirects anyone with link to users desired destination.
 
 app.get('/u/:id', (req, res) => {
-  const templateVar = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
-  };
-  urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
+  const url = urlDatabase[req.params.id];
+  if (url) {
+    url.useCount += 1;
+    res.redirect(url.longURL);
+    updateDatabase('urlDatabase.json', urlDatabase, () => {});
+    return;
+  }
+  res.redirect('/418');
 });
 
 //                                    //
@@ -222,7 +264,7 @@ app.get('/u/:id', (req, res) => {
 
 app.get('*', (req, res) => {
   const user = userDatabase[req.cookies.user_id];
-  if (user) { // just incase a user wants to be logged in for the 418 page :)
+  if (user) { // just incase a user is logged in for the 418 page :)
     const templateVar = { user };
     res.status(418).render('418', templateVar);
     return;
