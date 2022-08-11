@@ -41,25 +41,11 @@ app.post('/login', (req, res) => {
   const password = req.body.password;
   const user = findKey(userDatabase, (key) => userDatabase[key].email === email && userDatabase[key].password === password); // both email/Pw must match
   if (user) {
-    res.cookie('user', user);
+    res.cookie('user_id', user);
     res.redirect('/urls');
     return;
   }
-  res.status(401).render('login', { user: undefined }); // Have to use render to post 401 status
-});
-
-// GET urls
-
-app.get('/urls', (req, res) => {
-  if (userDatabase[req.cookies.user]) {
-    const templateVar = {
-      urls: urlDatabase,
-      user: userDatabase[req.cookies.user]
-    };
-    res.render('urls_index', templateVar);
-    return;
-  }
-  res.redirect('/register');
+  res.status(403).render('login', { user: undefined }); // Have to use render to post 403 status
 });
 
 // GET register
@@ -88,7 +74,7 @@ app.post('/register', (req, res) => {
         throw err;
       }
       console.log('User Database updated!');
-      res.cookie('user', uid);
+      res.cookie('user_id', uid);
       res.redirect('/urls');
       return;
     });
@@ -99,30 +85,44 @@ app.post('/register', (req, res) => {
 // USER MUST BE VALIDATED FOR THESE   //
 //                                    //
 
+// GET urls
+
+app.get('/urls', (req, res) => {
+  if (userDatabase[req.cookies.user_id]) {
+    const templateVar = {
+      urls: urlDatabase,
+      user: userDatabase[req.cookies.user_id]
+    };
+    res.render('urls_index', templateVar);
+    return;
+  }
+  res.status(403).render('login', { user: undefined }); // Have to use render to post 403 status
+});
 
 // GET urls/new
 
 app.get('/urls/new', (req, res) => {
-  if (userDatabase[req.cookies.user]) {
-    const templateVar = { user: userDatabase[req.cookies.user] };
+  const user = userDatabase[req.cookies.user_id];
+  if (user) {
+    const templateVar = { user: userDatabase[req.cookies.user_id] };
     res.render('urls_new', templateVar);
     return;
   }
-  res.redirect('/register');
+  res.status(403).render('login', { user: undefined });
 });
 
 
 // POST logout
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user');
+  res.clearCookie('user_id');
   res.redirect('/login');
 });
 
 // POST urls
 
 app.post('/urls', (req, res) => {
-  const user = userDatabase[req.cookies.user];
+  const user = userDatabase[req.cookies.user_id];
   if (user) {
     let randomString = generateRandomString(6); // new Urls are short.
     urlDatabase[randomString] = req.body.longURL;
@@ -134,7 +134,7 @@ app.post('/urls', (req, res) => {
       res.redirect(`/urls/${randomString}`);
     });
   }
-  res.status(401).render('login', { user: undefined }); // Have to use render to post 401 status
+  res.status(403).render('login', { user: undefined });
 });
 
 // DELETE by using POST urls/id/delete (stuck using POST for now)
@@ -171,7 +171,7 @@ app.get('/urls/:id', (req, res) => {
   const templateVar = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    user: userDatabase[req.cookies.user]
+    user: userDatabase[req.cookies.user_id]
   };
   res.render('urls_show', templateVar);
 });
@@ -182,7 +182,7 @@ app.get('/u/:id', (req, res) => {
   const templateVar = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: userDatabase[req.cookies.user]
+    user: userDatabase[req.cookies.user_id]
   };
   urlDatabase[templateVar.id] ? res.redirect(templateVar.longURL) : res.redirect('/418');
 });
@@ -194,8 +194,8 @@ app.get('/u/:id', (req, res) => {
 // GET catchall
 
 app.get('*', (req, res) => {
-  if (userDatabase[req.cookies.user]) {
-    const templateVar = { user: userDatabase[req.cookies.user] };
+  if (userDatabase[req.cookies.user_id]) {
+    const templateVar = { user: userDatabase[req.cookies.user_id] };
     res.status(418).render('418', templateVar);
   }
   res.status(418).render('418', { user: undefined }); // Breaks header if missing
