@@ -133,6 +133,7 @@ app.post('/urls', (req, res) => {
       console.log("URL Database updated");
       res.redirect(`/urls/${randomString}`);
     });
+    return;
   }
   res.status(403).render('login', { user: undefined });
 });
