@@ -2,11 +2,12 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
-const fs = require('fs'); // Used to create json files for database
+const fs = require('fs'); // Used to create json files for database. Read file doc.
 const cookieParser = require('cookie-parser');
 const User = require('./user'); // Used to register new users
 const generateRandomString = require('./generateRandomString');
 const findKey = require('./findKey'); // find key via findKey(object, callback)
+const updateDatabase = require("./updateDatabase"); // Used to update database json files
 
 //            //
 // Middleware //
@@ -22,8 +23,8 @@ app.use(cookieParser());
 const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
 const userDatabase = JSON.parse(fs.readFileSync('userDatabase.json'));
 
-const notUser = { user: undefined, userExists: true }; // Used to prevent header from breaking since _header.ejs uses user object
-
+const notUser = { user: undefined, invalidEntry: undefined }; // Used to prevent header from breaking since _header.ejs uses user object
+const invalidUser = { user: undefined, invalidEntry: true }; // Used to display alert on invalid registrations
 //                                    //
 // NON-USERS CAN ACCESS THESE PATHS   //
 //                                    //
@@ -32,6 +33,11 @@ const notUser = { user: undefined, userExists: true }; // Used to prevent header
 // GET login
 
 app.get('/login', (req, res) => {
+  const user = userDatabase[req.cookies.user_id];
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVar = notUser; // Breaks header if missing
   res.render('login', templateVar);
 });
@@ -69,22 +75,17 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
   const userExists = findKey(userDatabase, (key) =>  userDatabase[key].email === email);
   if (userExists || email === '' || password === '') { // Catch users trying to use blank email or passwords here
-    const templateVar = notUser;
-    res.status(400).render('registration', templateVar);
+    res.status(400).render('registration', invalidUser);
     return;
   }
   if (!userExists) {
     const uid = generateRandomString(15); // uid should be long to be more 'secure', I chose 15 chars
     userDatabase[uid] = new User(uid, email, password);
-    fs.writeFile('userDatabase.json', JSON.stringify(userDatabase), (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log('User Database updated!');
+    updateDatabase('userDatabase.json', userDatabase, () => {
       res.cookie('user_id', uid);
       res.redirect('/urls');
-      return;
-    });
+    }, "Updated User Database (POST new user)");
+    return;
   }
 });
 
@@ -134,13 +135,9 @@ app.post('/urls', (req, res) => {
   if (user) {
     let randomString = generateRandomString(6); // new Urls are short.
     urlDatabase[randomString] = req.body.longURL;
-    fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log("URL Database updated");
+    updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect(`/urls/${randomString}`);
-    });
+    }, "URL Database updated (POST new URL)");
     return;
   }
   res.status(403).render('login', notUser);
@@ -153,13 +150,9 @@ app.post('/urls/:id/delete', (req, res) => {
   if (user) {
     delete urlDatabase[req.params.id];
     console.log(`url for ${req.params.id} deleted from database!`);
-    fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log('Database updated (DELETE)');
+    updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
-    });
+    }, "URL Database POST (DELETE URL)");
     return;
   }
   res.status(403).render('login', notUser);
@@ -172,13 +165,9 @@ app.post('/urls/:id/update', (req, res) => {
   if (user) {
     urlDatabase[req.params.id] = req.body.longURL;
     console.log(`url for ${req.params.id} update reqested!`);
-    fs.writeFile('urlDatabase.json', JSON.stringify(urlDatabase), (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log('Database updated (UPDATE)');
+    updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
-    });
+    }, 'URL Database updated (POST URL)');
     return;
   }
   res.status(403).render('login', notUser);
@@ -192,7 +181,7 @@ app.get('/urls/:id', (req, res) => {
     const templateVar = {
       id: req.params.id,
       longURL: urlDatabase[req.params.id],
-      user: userDatabase[req.cookies.user_id]
+      user
     };
     res.render('urls_show', templateVar);
     return;
@@ -222,12 +211,14 @@ app.get('/u/:id', (req, res) => {
 // GET catchall
 
 app.get('*', (req, res) => {
-  if (userDatabase[req.cookies.user_id]) {
-    const templateVar = { user: userDatabase[req.cookies.user_id] };
+  const user = userDatabase[req.cookies.user_id];
+  if (user) { // just incase a user wants to be logged in for the 418 page :)
+    const templateVar = { user };
     res.status(418).render('418', templateVar);
   }
   res.status(418).render('418', notUser); // Breaks header if missing
 });
+
 // Start server to listen
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
