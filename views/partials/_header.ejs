@@ -1,6 +1,6 @@
 <header>
-  <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #006a7d;">
-    <a class="navbar-brand" href="/urls">TinyApp</a>
+  <nav class="navbar navbar-expand-md navbar-dark" style="background-color: #006a7d;font-size: 22px;">
+    <a class="navbar-brand" href="/login"><h4>TinyApp</h4></a>
     <button
       class="navbar-toggler"
       type="button"
@@ -17,9 +17,9 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-    </div><% if (username) { %> 
-      <p style="color: white;font-size: large;margin-right: 1%;margin-bottom: 2px;">Logged in as: <%= username %></p> <form method="POST" action="/logout"><button class="btn btn-secondary" type="submit">Logout</button></form>
-      <% } else { %><form class="d-flex" method="POST" action="/login"><input class="form-control" name="username" placeholder="username"><button class="btn btn-primary" type="submit">Login</button> 
+    </div><% if (user) { %> 
+      <p style="color: white;font-size: large;margin-right: 1%;margin-bottom: 2px;">Logged in as: <%= user.email %></p> <form method="POST" action="/logout"><button class="btn btn-secondary" type="submit">Logout</button></form>
+      <% } else { %><form class="d-flex" method="GET" action="/login"><button class="btn btn-primary" type="submit">Login</button></form><form class="d-flex" method="GET" action="/register"><button class="btn btn-success" style="margin-left: 30px;" type="submit">Register</button>  
         <% } %>
     </form>
   </nav>
