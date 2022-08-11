@@ -20,7 +20,7 @@
   </head>
   <body style="background-color: #212529;color: white;">
     <%- include('partials/_header') %>
-    <% if (userExists) { %>
+    <% if (invalidEntry) { %>
       <div class="alert alert-danger" role="alert" style="margin-top: 1%;">
         That email or password combination is invalid or already registered, sorry!
       </div>
