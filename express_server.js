@@ -2,12 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
-const fs = require('fs'); // Used to create json files for database. Read file doc.
 const cookieParser = require('cookie-parser');
 const User = require('./user'); // Used to register new users
 const generateRandomString = require('./generateRandomString');
 const findKey = require('./findKey'); // find key via findKey(object, callback)
-const updateDatabase = require("./updateDatabase"); // Used to update database json files
+const updateDatabase = require("./updateDatabase"); // Used to update database json files.
 
 //            //
 // Middleware //
@@ -20,13 +19,16 @@ app.use(cookieParser());
 
 //
 // Create databases from local storage.
-const urlDatabase = JSON.parse(fs.readFileSync('urlDatabase.json'));
-const userDatabase = JSON.parse(fs.readFileSync('userDatabase.json'));
+const urlDatabase = require('./urlDatabase.json');
+const userDatabase = require('./userDatabase.json');
 
+
+// Blank templates for when someone is not signed in.
 const notUser = { user: undefined, invalidEntry: undefined }; // Used to prevent header from breaking since _header.ejs uses user object
 const invalidUser = { user: undefined, invalidEntry: true }; // Used to display alert on invalid registrations
+
 //                                    //
-// NON-USERS CAN ACCESS THESE PATHS   //
+// NON-USERS PATHS BELOW              //
 //                                    //
 
 
@@ -54,7 +56,7 @@ app.post('/login', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.status(403).render('login', notUser); // Have to use render to post 403 status
+  res.status(403).render('login', invalidUser); // Have to use render to post 403 status
 });
 
 // GET register
@@ -90,7 +92,7 @@ app.post('/register', (req, res) => {
 });
 
 //                                    //
-// USER MUST BE VALIDATED FOR THESE   //
+// USER PATHS BELOW                   //
 //                                    //
 
 // GET urls
