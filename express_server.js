@@ -46,7 +46,7 @@ app.get('/urls/new', (req, res) => {
 //
 // GET register
 app.get('/register', (req, res) => {
-  const templateVar = { user: undefined, userExists: undefined }; // If someone is registering they aren't currently a user
+  const templateVar = { user: undefined, userExists: undefined }; // If someone is registering they aren't currently a user, breaks header if missing
   res.render('registration', templateVar);
 });
 //
@@ -77,7 +77,7 @@ app.post('/register', (req, res) => {
 //
 // GET login
 app.get('/login', (req, res) => {
-  const templateVar = { user: undefined };
+  const templateVar = { user: undefined }; // Breaks header if missing
   res.render('login', templateVar);
 });
 //
@@ -97,7 +97,7 @@ app.post('/login', (req, res) => {
 // POST logout
 app.post('/logout', (req, res) => {
   res.clearCookie('user');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 //
 // POST urls
@@ -166,7 +166,7 @@ app.get('*', (req, res) => {
     const templateVar = { user: userDatabase[req.cookies.user] };
     res.status(418).render('418', templateVar);
   }
-  res.status(418).render('418', { user: undefined });
+  res.status(418).render('418', { user: undefined }); // Breaks header if missing
 });
 // Start server to listen
 app.listen(PORT, () => {
