@@ -1,15 +1,16 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-const morgan = require('morgan');
-const fs = require('fs');
+const morgan = require('morgan'); // debugging on server
+const fs = require('fs'); // Used to create json files for database
 const cookieParser = require('cookie-parser');
-const User = require('./user');
+const User = require('./user'); // Used to register new users
 const generateRandomString = require('./generateRandomString');
-const findKey = require('./findKey');
+const findKey = require('./findKey'); // find key via findKey(object, callback)
 
-//
-// Middleware
+//            //
+// Middleware //
+//            //
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Dev middleware for debugging
