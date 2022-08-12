@@ -13,9 +13,10 @@ User Feature-List:
 
 # Server Setup and Information
 
-For first time setup, you can run a server using the following: 
+For first time setup, you can run a server using the following commands: 
 
 ```
+npm install
 npm run tinyappsetup
 npm run tinyapp 
 ```
@@ -32,3 +33,4 @@ Server Features:
 * Server is only in darkmode, so you can feel superior over lightmode tinyApps.
 
 Heaped together from scraps by [@sachieko](https://github.com/sachieko).
+Issues? Let me know!
