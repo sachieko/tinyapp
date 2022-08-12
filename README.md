@@ -1,14 +1,14 @@
-# TinyApp
-LHL Web Dev Project
+# TinyApp with Darkmode
 
 TinyApp is a RESTful full stack web application built with Node and Express that allows users to shorten long URLs like bit.ly or tiny.url! This app has user logins and user-specific links, and has a *dark-mode theme*.
 
 ## Final Product
 
-Login Screen
-![Login Screen](/sampleImages/LoginPage.png)
-Logged in User view
-![URLs Screen](/sampleImages/urlspage.png)
+|Login Screen|
+|---|
+| ![Login Screen](/sampleImages/LoginPage.png) |
+|**Logged in User view**|
+|![URLs Screen](/sampleImages/urlspage.png)|
 
 User Feature-List:
 
@@ -27,10 +27,11 @@ User Feature-List:
 - Node.js
 - method-override
 
-### Dev Dependencies:
+### Dev Dependencies
 - mocha
 - chai
 - morgan (was made to uninstall but recommend if you work on it)
+
 
 # Server Setup and Information
 
@@ -56,14 +57,20 @@ If your server databases ever break, you can run ``npm run tinyappsetup`` again 
 * Constants are easy to customize in the constants.js folder
 * For devs, there are some debug functions built in.
 * Server sends html in a darkmode, so you can feel *superior* over lightmode tinyApps.
+* Uses https://http.cat API for some specific user errors.
 
-Heaped together from scraps by [@sachieko](https://github.com/sachieko).
+> Heaped together from scraps by [@sachieko](https://github.com/sachieko).
 Issues? Let me know!
 
-# More Visuals!
-Editing links page
-!["screenshot description"](/sampleImages/editpage.png)
-Creating a new URL page
-!["screenshot description"](/sampleImages/newurlpage.png)
-What users see when trying to access another's content
-!["screenshot description"](/sampleImages/meddlingwarning.png)
+<details><summary>More Visuals!</summary>
+<p>
+
+|Editing links page|
+|---|
+|!["screenshot description"](/sampleImages/editpage.png)|
+|**Creating a new URL page**|
+|!["screenshot description"](/sampleImages/newurlpage.png)|
+|**What users see when trying to access another's content**|
+|!["screenshot description"](/sampleImages/meddlingwarning.png)|
+</p>
+</details>
