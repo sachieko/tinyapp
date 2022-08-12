@@ -2,9 +2,10 @@
   "name": "tinyapp",
   "version": "1.0.0",
   "description": "",
-  "main": "express_server.js",
+  "main": "node express_server.js",
   "scripts": {
     "test": "mocha",
+    "start": "node express_server.js",
     "tinyappsetup": "echo \"{}\" > urlDatabase.json && echo \"{}\" > userDatabase.json",
     "tinyapp": "node express_server.js"
   },
