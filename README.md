@@ -25,6 +25,7 @@ User Feature-List:
 - EJS
 - cookie-session.
 - Node.js
+- method-override
 
 ### Dev Dependencies:
 - mocha
