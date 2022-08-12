@@ -62,7 +62,7 @@ If your server databases ever break, you can run ``npm run tinyappsetup`` again 
 > Heaped together from scraps by [@sachieko](https://github.com/sachieko).
 Issues? Let me know!
 
-<details><summary>More Visuals!</summary>
+<details><summary><h3>More Visuals!</h3></summary>
 <p>
 
 |Editing links page|
