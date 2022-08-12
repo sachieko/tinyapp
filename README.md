@@ -65,13 +65,13 @@ Issues? Let me know!
 <details><summary><h3>More Visuals!</h3></summary>
 <span>
 
-|Editing links page|
-|---|
-|!["screenshot description"](/sampleImages/editpage.png)|
-|**Creating a new URL page**|
-|!["screenshot description"](/sampleImages/newurlpage.png)|
-|**What users see when trying to access another's content**|
-|!["screenshot description"](/sampleImages/meddlingwarning.png)|
+Editing links page
+
+!["screenshot description"](/sampleImages/editpage.png)
+**Creating a new URL page**
+!["screenshot description"](/sampleImages/newurlpage.png)
+**What users see when trying to access another's content**
+!["screenshot description"](/sampleImages/meddlingwarning.png)
 
 </span>
 </details>
