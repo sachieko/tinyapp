@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const PORT = 8080; // default port 8080
+const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, updateUrlMsg, updateUsersMsg, deleteUrlMsg, pwLength } = require('./constants');
 const morgan = require('morgan'); // debugging on server
 const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
@@ -22,13 +22,6 @@ app.use(cookieSession({
 // Create databases from local storage. If this doesn't work, enter into cli: npm run tinyappsetup
 const urlDatabase = require('./urlDatabase.json');
 const userDatabase = require('./userDatabase.json');
-const urlLength = 4; // Sets minimum length of new urls
-const uidLength = 15; // Sets minimum length of new user ids
-
-// Blank templates for when someone is not signed in.
-const notUser = { user: undefined, invalidEntry: undefined }; // Used to prevent header from breaking since _header.ejs uses user object
-const invalidUser = { user: undefined, invalidEntry: 0 }; // Used to display alert on invalid registrations
-const loginPlease = { user: undefined, invalidEntry: 1 }; // Used to display alert for triyng GET urls without logging in.
 
 //                                    //
 // NON-USERS PATHS BELOW              //
@@ -87,7 +80,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const passwordHash = bcrypt.hashSync(req.body.password, 10);
   const userExists = getUserByEmail(userDatabase, email);
-  if (userExists || email === '' || req.body.password === '') { // Catch users trying to use blank email/password or previous emails
+  if (userExists || email === '' || req.body.password === '' || req.body.password.length > pwLength) { // Catch users trying to use blank or invalid email/passwords
     res.status(400).render('registration', invalidUser);
     return;
   }
@@ -100,7 +93,7 @@ app.post('/register', (req, res) => {
     updateDatabase('userDatabase.json', userDatabase, () => {
       req.session["user_id"] = uid;
       res.redirect('/urls');
-    }, "Updated User Database (POST new user)");
+    }, updateUsersMsg);
     return;
   }
 });
@@ -157,7 +150,7 @@ app.post('/urls', (req, res) => {
     urlDatabase[randomString] = new Url(req.body.longURL, user.uid);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect(`/urls/${randomString}`);
-    }, "URL Database updated (POST new URL)");
+    }, updateUrlMsg);
     return;
   }
   res.status(403).render('login', loginPlease);
@@ -173,7 +166,7 @@ app.post('/urls/:id/update', (req, res) => {
     url.longURL = req.body.longURL;
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
-    }, 'URL Database updated (POST URL)');
+    }, updateUrlMsg);
     return;
   }
   if (user && !url) {
@@ -196,10 +189,9 @@ app.post('/urls/:id/delete', (req, res) => {
   const url = urls[req.params.id];
   if (user && url.userID === user.uid) {
     delete urlDatabase[req.params.id];
-    console.log(`url for ${req.params.id} deleted from database!`);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
-    }, "URL Database POST (DELETE URL)");
+    }, deleteUrlMsg);
     return;
   }
   if (user && url.userID !== user.uid) {
