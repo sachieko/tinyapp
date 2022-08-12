@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, pwLength } = require('./constants');
+const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, pwLength } = require('./constants'); // Each constant is explained in the constants.js file
 const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
