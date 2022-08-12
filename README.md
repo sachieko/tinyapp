@@ -40,11 +40,11 @@ For first time setup, use the following commands:
 ```
 npm install
 npm run tinyappsetup
-npm run tinyapp 
+npm start
 ```
-After, you can simply run the server with: 
+After, you can simply run the server with ``npm run tinyapp`` or:
 ```
-npm run tinyapp
+npm start
 ```
 
 If your server databases ever break, you can run ``npm run tinyappsetup`` again and it will clean them. Do not do this again if you like your databases, back them up even. **:)**
@@ -63,7 +63,7 @@ If your server databases ever break, you can run ``npm run tinyappsetup`` again 
 Issues? Let me know!
 
 <details><summary><h3>More Visuals!</h3></summary>
-<p>
+<span>
 
 |Editing links page|
 |---|
@@ -72,5 +72,6 @@ Issues? Let me know!
 |!["screenshot description"](/sampleImages/newurlpage.png)|
 |**What users see when trying to access another's content**|
 |!["screenshot description"](/sampleImages/meddlingwarning.png)|
-</p>
+
+</span>
 </details>
