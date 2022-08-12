@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, pwLength } = require('./constants'); // Each constant is explained in the constants.js file
 const cookieSession = require('cookie-session');
-const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
+const { getUserByEmail, User, Url, updateDatabase, urlsForUser, generateUniqueID } = require('./helpers/helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
 
 //            //
@@ -21,6 +21,20 @@ app.use(cookieSession({
 const urlDatabase = require('./urlDatabase.json');
 const userDatabase = require('./userDatabase.json');
 
+//  - - - - - - - - - - - - - - - - - - -
+// Helper functions which require express.
+const loginRedirectAsk = function(req, res) {
+  res.status(403).render('login', loginPlease);
+};
+
+const loginRedirect = function(req, res) {
+  res.redirect('/login');
+};
+
+const renderInvalidLogin = function(req, res) {
+  res.status(403).render('login', invalidUser); // Have to use render to send 403 status
+};
+
 //                                    //
 // NON-USERS PATHS BELOW              //
 //                                    //
@@ -34,7 +48,7 @@ app.get('/', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.redirect('/login');
+  loginRedirect(req, res);
 });
 
 app.get('/login', (req, res) => {
@@ -58,7 +72,7 @@ app.post('/login', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.status(403).render('login', invalidUser); // Have to use render to send 403 status
+  renderInvalidLogin(req, res); // Have to use render to send 403 status
 });
 
 // GET register
@@ -83,10 +97,7 @@ app.post('/register', (req, res) => {
     return;
   }
   if (!userExists) {
-    let uid = generateRandomString(uidLength);
-    while (userDatabase[uid]) { // Prevents duplicate user ids
-      uid += generateRandomString(1);
-    }
+    const uid = generateUniqueID(uidLength, userDatabase);
     userDatabase[uid] = new User(uid, email, passwordHash);
     updateDatabase('userDatabase.json', userDatabase, () => {
       req.session["user_id"] = uid;
@@ -104,7 +115,7 @@ app.post('/register', (req, res) => {
 
 app.post('/logout', (req, res) => {
   req.session = null;
-  res.redirect('/login');
+  loginRedirect(req, res);
 });
 
 // GET urls
@@ -120,7 +131,7 @@ app.get('/urls', (req, res) => {
     res.render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', loginPlease); // Have to use render to send 403 status
+  loginRedirectAsk(req, res); // Have to use render to send 403 status
 });
 
 // GET urls/new
@@ -132,7 +143,7 @@ app.get('/urls/new', (req, res) => {
     res.render('urls_new', templateVar);
     return;
   }
-  res.status(403).render('login', loginPlease);
+  loginRedirectAsk(req, res);
 });
 
 // POST urls
@@ -140,17 +151,14 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
   if (user) {
-    let randomString = generateRandomString(urlLength);
-    while (urlDatabase[randomString]) { // Prevents duplicate urls
-      randomString += generateRandomString(1);
-    }
-    urlDatabase[randomString] = new Url(req.body.longURL, user.uid);
+    const urlID = generateUniqueID(urlLength, urlDatabase);
+    urlDatabase[urlID] = new Url(req.body.longURL, user.uid);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
-      res.redirect(`/urls/${randomString}`);
+      res.redirect(`/urls/${urlID}`);
     });
     return;
   }
-  res.status(403).render('login', loginPlease);
+  loginRedirectAsk(req, res);
 });
 
 // UPDATE with POST urls/id/update
@@ -176,7 +184,7 @@ app.post('/urls/:id/update', (req, res) => {
     res.status(401).render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', loginPlease);
+  loginRedirectAsk(req, res);
 });
 
 // DELETE with POST urls/id/delete (stuck using POST for now)
@@ -202,7 +210,7 @@ app.post('/urls/:id/delete', (req, res) => {
     res.status(401).render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', loginPlease);
+  loginRedirectAsk(req, res);
 });
 
 // GET urls/:id
@@ -231,7 +239,7 @@ app.get('/urls/:id', (req, res) => {
     res.status(401).render('urls_index', templateVar);
     return;
   }
-  res.status(403).render('login', loginPlease);
+  loginRedirectAsk(req, res);
 });
 
 //                                 //
