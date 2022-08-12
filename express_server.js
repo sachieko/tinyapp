@@ -24,7 +24,7 @@ const userDatabase = require('./userDatabase.json');
 //  - - - - - - - - - - - - - - - - - - -
 // Helper functions which require express.
 const loginRedirectAsk = function(req, res) {
-  res.status(403).render('login', loginPlease);
+  res.status(403).render('login', loginPlease); // Renders a template with alert telling user to login to do what they were trying to do.
 };
 
 const loginRedirect = function(req, res) {
@@ -32,7 +32,7 @@ const loginRedirect = function(req, res) {
 };
 
 const renderInvalidLogin = function(req, res) {
-  res.status(403).render('login', invalidUser); // Have to use render to send 403 status
+  res.status(403).render('login', invalidUser); // Renders a template with alert telling them the email/pw wasn't valid.
 };
 
 //                                    //
@@ -72,7 +72,7 @@ app.post('/login', (req, res) => {
     res.redirect('/urls');
     return;
   }
-  renderInvalidLogin(req, res); // Have to use render to send 403 status
+  renderInvalidLogin(req, res);
 });
 
 // GET register
@@ -131,7 +131,7 @@ app.get('/urls', (req, res) => {
     res.render('urls_index', templateVar);
     return;
   }
-  loginRedirectAsk(req, res); // Have to use render to send 403 status
+  loginRedirectAsk(req, res);
 });
 
 // GET urls/new
@@ -233,7 +233,7 @@ app.get('/urls/:id', (req, res) => {
     const templateVar = {
       urls,
       user,
-      meddling: true
+      meddling: true // Causes a *fun* alert.
     };
     console.log(`User: ${user.email} is meddling`);
     res.status(401).render('urls_index', templateVar);
