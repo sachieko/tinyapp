@@ -13,11 +13,35 @@ const testUsers = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "thisisahash!"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "thisisahash2!"
   }
 };
+
+describe('#getUserByEmail tests', function() {
+  it('should return a user with valid email', function() {
+    const user = getUserByEmail(testUsers, "user@example.com");
+    const expectedUserID = "userRandomID";
+    assert.equal(user, expectedUserID);
+  });
+  it('should return undefined for an invalid email', function() {
+    const user = getUserByEmail(testUsers, "hey@someguy.com");
+    const expectedUserID = undefined;
+    assert.equal(user, expectedUserID);
+  });
+});
+
+describe('#generateRandomString tests', function() {
+  it('should return a random string with length of 6', function() {
+    const string = generateRandomString(6);
+    assert.equal(string.length, 6);
+  });
+  it('should return a random string with a length of 15', function() {
+    const string = generateRandomString(15);
+    assert.equal(string.length, 15);
+  });
+});
