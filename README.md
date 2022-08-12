@@ -12,11 +12,11 @@ TinyApp is a RESTful full stack web application built with Node and Express that
 
 User Feature-List:
 
-* > Users can register by email
-* > Can create personal shortened links which are shareable with anyone
-* > The user can track how many times their shortened links are clicked
-* > Users can edit and update the destination URLS, or delete them if they no longer want them.
-* > Only they can edit and delete links they created!
+* [x] Users can register by email
+* [x] Can create personal shortened links which are shareable with anyone
+* [x] The user can track how many times their shortened links are clicked
+* [x] Users can edit and update the destination URLS, or delete them if they no longer want them.
+* [x] Only they can edit and delete links they created!
 
 ## Dependencies
 
