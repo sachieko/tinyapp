@@ -1,8 +1,8 @@
-const urlsForUser = function(userid, dataObject) {
+const urlsForUser = function(userid, urlData) {
   let result = {};
-  for (let url in dataObject) {
-    if (dataObject[url].userID === userid) {
-      result[url] = dataObject[url];
+  for (let url in urlData) {
+    if (urlData[url].userID === userid) {
+      result[url] = urlData[url];
     }
   }
   return result;
