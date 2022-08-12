@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, pwLength } = require('./constants');
-// const morgan = require('morgan'); // debugging on server
 const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
@@ -11,7 +10,6 @@ const bcrypt = require('bcryptjs');
 //            //
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
-// app.use(morgan('dev')); // Dev middleware for debugging
 app.use('/images', express.static('images'));
 app.use(cookieSession({
   name: 'tinyApp',
