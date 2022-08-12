@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha",
-    "tinyappsetup": "echo \"{}\" > urlDatabase.json && echo \"{}\" > userDatabase.json"
+    "tinyappsetup": "echo \"{}\" > urlDatabase.json && echo \"{}\" > userDatabase.json",
+    "tinyapp": "node express_server.js"
   },
   "repository": {
     "type": "git",

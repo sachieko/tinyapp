@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const morgan = require('morgan'); // debugging on server
 const cookieSession = require('cookie-session');
-const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers'); // Contains helper functions and classes
+const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
 
 //            //
@@ -19,7 +19,7 @@ app.use(cookieSession({
 }));
 
 //
-// Create databases from local storage.
+// Create databases from local storage. If this doesn't work, enter into cli: npm run tinyappsetup
 const urlDatabase = require('./urlDatabase.json');
 const userDatabase = require('./userDatabase.json');
 const urlLength = 4; // Sets minimum length of new urls
@@ -171,8 +171,6 @@ app.post('/urls/:id/update', (req, res) => {
   const url = urls[req.params.id];
   if (user && url) { // If user and url is theirs
     url.longURL = req.body.longURL;
-    url.useCount = 0; // reset;
-    console.log(`url for ${req.params.id} update reqested!`);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
     }, 'URL Database updated (POST URL)');
@@ -281,5 +279,5 @@ app.get('*', (req, res) => {
 
 // Start server to listen
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
