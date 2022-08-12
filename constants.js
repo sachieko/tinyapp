@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 
 const PORT = 8080; // default hosting port is 8080
 const urlLength = 4; // Sets minimum length of new urls.
@@ -9,9 +10,9 @@ const notUser = { user: undefined, invalidEntry: undefined }; // Used to prevent
 const invalidUser = { user: undefined, invalidEntry: 0 }; // Used to display alert on invalid registrations
 const loginPlease = { user: undefined, invalidEntry: 1 }; // Used to display alert for triyng GET urls without logging in.
 
-
-const updateUrlMsg = '';
-const updateUsersMsg = '';
-const deleteUrlMsg = '';
+// These messages will log to your server console whenever the action occurs so you can debug and see activity.
+const updateUrlMsg = chalk.green('URL Database updated! (POST)');
+const updateUsersMsg = chalk.blue('User Database updated! (POST)');
+const deleteUrlMsg = chalk.red('URL Database updated! (DELETE)');
 
 module.exports = { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, updateUrlMsg, updateUsersMsg, deleteUrlMsg, pwLength };

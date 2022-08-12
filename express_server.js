@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, updateUrlMsg, updateUsersMsg, deleteUrlMsg, pwLength } = require('./constants');
-const morgan = require('morgan'); // debugging on server
+// const morgan = require('morgan'); // debugging on server
 const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 //            //
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev')); // Dev middleware for debugging
+// app.use(morgan('dev')); // Dev middleware for debugging
 app.use('/images', express.static('images'));
 app.use(cookieSession({
   name: 'tinyApp',
@@ -210,12 +210,13 @@ app.post('/urls/:id/delete', (req, res) => {
 // GET urls/:id
 
 app.get('/urls/:id', (req, res) => {
+  const id = req.params.id;
   const user = userDatabase[req.session["user_id"]];
   const urls = urlsForUser(user.uid, urlDatabase);
-  const url = urls[req.params.id];
+  const url = urls[id];
   if (user && url) { // The specific url must be in the users urls.
     const templateVar = {
-      id: req.params.id,
+      id,
       url,
       user
     };
