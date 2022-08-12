@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, updateUrlMsg, updateUsersMsg, deleteUrlMsg, pwLength } = require('./constants');
+const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, pwLength } = require('./constants');
 // const morgan = require('morgan'); // debugging on server
 const cookieSession = require('cookie-session');
 const { getUserByEmail, generateRandomString, User, Url, updateDatabase, urlsForUser } = require('./helpers/helpers'); // Contains helper functions and classes
@@ -93,7 +93,7 @@ app.post('/register', (req, res) => {
     updateDatabase('userDatabase.json', userDatabase, () => {
       req.session["user_id"] = uid;
       res.redirect('/urls');
-    }, updateUsersMsg);
+    });
     return;
   }
 });
@@ -149,7 +149,7 @@ app.post('/urls', (req, res) => {
     urlDatabase[randomString] = new Url(req.body.longURL, user.uid);
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect(`/urls/${randomString}`);
-    }, updateUrlMsg);
+    });
     return;
   }
   res.status(403).render('login', loginPlease);
@@ -165,7 +165,7 @@ app.post('/urls/:id/update', (req, res) => {
     url.longURL = req.body.longURL;
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
-    }, updateUrlMsg);
+    });
     return;
   }
   if (user && !url) {
@@ -191,7 +191,7 @@ app.post('/urls/:id/delete', (req, res) => {
     delete urlDatabase[req.params.id];
     updateDatabase('urlDatabase.json', urlDatabase, () => {
       res.redirect('/urls');
-    }, deleteUrlMsg);
+    });
     return;
   }
   if (user && url.userID !== user.uid) {
