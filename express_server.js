@@ -1,9 +1,11 @@
 const express = require('express');
+const methodOverride = require('method-override');
 const app = express();
 const { PORT, urlLength, uidLength, notUser, invalidUser, loginPlease, pwLength } = require('./constants'); // Each constant is explained in the constants.js file
 const cookieSession = require('cookie-session');
 const { getUserByEmail, User, Url, updateDatabase, urlsForUser, generateUniqueID } = require('./helpers/helpers'); // Contains helper functions and classes
 const bcrypt = require('bcryptjs');
+
 
 //            //
 // Middleware //
@@ -15,7 +17,7 @@ app.use(cookieSession({
   name: 'tinyApp',
   keys: ['ImisslivinginJapanbecausethefoodwascheap$$andlike$5adaytoeatout','thefunniestnumbersare6942066677andthecoolestis4']
 }));
-
+app.use(methodOverride('_method'));
 //
 // Create databases from local storage. If this doesn't work, enter into cli: npm run tinyappsetup
 const urlDatabase = require('./urlDatabase.json');
@@ -161,9 +163,9 @@ app.post('/urls', (req, res) => {
   loginRedirectAsk(req, res);
 });
 
-// UPDATE with POST urls/id/update
+// PUT urls/:id
 
-app.post('/urls/:id/update', (req, res) => {
+app.put('/urls/:id', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
   const urls = urlsForUser(user.uid, urlDatabase);
   const url = urls[req.params.id];
@@ -187,9 +189,9 @@ app.post('/urls/:id/update', (req, res) => {
   loginRedirectAsk(req, res);
 });
 
-// DELETE with POST urls/id/delete (stuck using POST for now)
+// DELETE urls/:id
 
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
   const urls = urlsForUser(user.uid, urlDatabase);
   const url = urls[req.params.id];
