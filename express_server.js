@@ -37,14 +37,22 @@ const loginPlease = { user: undefined, invalidEntry: 1 }; // Used to display ale
 
 // GET login
 
+app.get('/', (req, res) => {
+  const user = userDatabase[req.session["user_id"]];
+  if (user) {
+    res.redirect('/urls');
+    return;
+  }
+  res.redirect('/login');
+});
+
 app.get('/login', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
   if (user) {
     res.redirect('/urls');
     return;
   }
-  const templateVar = notUser; // Breaks header if missing
-  res.render('login', templateVar);
+  res.render('login', notUser); // Header requires an object
 });
 
 
@@ -65,7 +73,7 @@ app.post('/login', (req, res) => {
 // GET register
 
 app.get('/register', (req, res) => {
-  const user = userDatabase[req.session["user_id"]]; // If someone is registering they aren't currently a user, breaks header if missing
+  const user = userDatabase[req.session["user_id"]];
   if (user) {
     res.redirect('/urls');
     return;
@@ -79,7 +87,7 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const passwordHash = bcrypt.hashSync(req.body.password, 10);
   const userExists = getUserByEmail(userDatabase, email);
-  if (userExists || email === '' || req.body.password === '') { // Catch users trying to use blank email or passwords here
+  if (userExists || email === '' || req.body.password === '') { // Catch users trying to use blank email/password or previous emails
     res.status(400).render('registration', invalidUser);
     return;
   }
