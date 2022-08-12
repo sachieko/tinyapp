@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "tinyappsetup": "echo \"{}\" > urlDatabase.json && echo \"{}\" > userDatabase.json"
   },
   "repository": {
     "type": "git",
