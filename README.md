@@ -44,7 +44,10 @@ After, you can simply run the server with:
 ```
 npm run tinyapp
 ```
-Server Features:
+
+If your server databases ever break, you can run ``npm run tinyappsetup`` again and it will clean them. Do not do this again if you like your databases, back them up even. **:)**
+
+### Server Features:
 
 * **User PWs are hashed**
 * **Cookies are encrypted**
