@@ -1,7 +1,7 @@
 # TinyApp
 LHL Web Dev Project
 
-TinyApp is a full stack web application built with Node and Express that allows users to shorten long URLs like bit.ly or tiny.url! This app has user logins and user-specific links, and has a *dark-mode theme*.
+TinyApp is a RESTful full stack web application built with Node and Express that allows users to shorten long URLs like bit.ly or tiny.url! This app has user logins and user-specific links, and has a *dark-mode theme*.
 
 ## Final Product
 
