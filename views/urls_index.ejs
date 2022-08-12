@@ -45,7 +45,7 @@
             <tr>
               <td><a class="list-group-item list-group-item-action list-group-item-dark" href="/u/<%= id %>"><%= id %></a></td>
               <td><a class="list-group-item list-group-item-action list-group-item-dark" href="/u/<%= id %>">http://localhost:8080/<%= id %></a></td>
-              <td><a class= "list-group-item list-group-item-action list-group-item-dark" href="<%= urls[id] %>"><%= urls[id].longURL %></a></td>
+              <td><a class= "list-group-item list-group-item-action list-group-item-dark" href="<%= urls[id].longURL %>"><%= urls[id].longURL %></a></td>
               <td><p class="list-group-item list-group-item-action list-group-item-dark"><%= urls[id].useCount %></p></td>
               <td><form method="GET" action="/urls/<%= id %>"><button class="btn btn-primary" style="height: 50px;" type="submit" name="Edit">Edit</button></form></td>
               <td><form method="POST" action="/urls/<%= id %>/delete"><button class="btn btn-danger" style="height: 50px;" type="submit" name="Delete">Delete</button></form></td>
