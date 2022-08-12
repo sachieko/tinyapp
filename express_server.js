@@ -102,6 +102,13 @@ app.post('/register', (req, res) => {
 // USER PATHS                         //
 //                                    //
 
+// POST logout
+
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
+});
+
 // GET urls
 
 app.get('/urls', (req, res) => {
@@ -130,14 +137,6 @@ app.get('/urls/new', (req, res) => {
   res.status(403).render('login', loginPlease);
 });
 
-
-// POST logout
-
-app.post('/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/login');
-});
-
 // POST urls
 
 app.post('/urls', (req, res) => {
@@ -156,7 +155,7 @@ app.post('/urls', (req, res) => {
   res.status(403).render('login', loginPlease);
 });
 
-// UPDATE by using POST urls/id/update
+// UPDATE with POST urls/id/update
 
 app.post('/urls/:id/update', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
@@ -181,7 +180,8 @@ app.post('/urls/:id/update', (req, res) => {
   }
   res.status(403).render('login', loginPlease);
 });
-// DELETE by using POST urls/id/delete (stuck using POST for now)
+
+// DELETE with POST urls/id/delete (stuck using POST for now)
 
 app.post('/urls/:id/delete', (req, res) => {
   const user = userDatabase[req.session["user_id"]];
